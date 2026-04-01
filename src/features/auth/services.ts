@@ -1,8 +1,11 @@
 import apiClient from "@/lib/axios";
 
+export type LoginRequest = {
+  email: string;
+  password: string;
+};
 
-
-type LoginResponse = {                                                                                                                                                                                                              
+export type AuthResponse = {
   accessToken: string;
   message: string;
   user: {
@@ -22,10 +25,9 @@ type LoginApiData = {
   role: string;
 };
 
-
 export const authApi = {
-  fakeLogin: async (): Promise<LoginResponse> => {
-    const  data  = (await apiClient.get("/login/1")) as LoginApiData;
+  fakeLogin: async (): Promise<AuthResponse> => {
+    const data = (await apiClient.get("/login/1")) as LoginApiData;
 
     return {
       accessToken: data.accessToken,
@@ -37,5 +39,12 @@ export const authApi = {
         role: data.role,
       },
     };
+  },
+};
+
+export const authService = {
+  login: async (_payload: LoginRequest): Promise<AuthResponse> => {
+    void _payload;
+    return authApi.fakeLogin();
   },
 };

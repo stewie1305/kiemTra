@@ -14,8 +14,8 @@ const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use((config) => {
-  const acccessToken = useAuthStore.getState().acccessToken;
-  if (accessToken) {
+  const acccessToken = useAuthStore.getState().accessToken;
+  if (acccessToken) {
     config.headers.Authorization = `Bearer ${acccessToken}`;
   }
   return config;
@@ -50,17 +50,19 @@ apiClient.interceptors.response.use(
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
-        }).then((accessToken) => {
-          processQueue(null, accessToken);
-          originalReq.headers.Authorization = `Bearer ${accessToken}`;
+        }).then((token) => {
+          originalReq.headers.Authorization = `Bearer ${token}`;
           apiClient(originalReq);
         });
       }
       isRefreshing = true;
       originalReq._retry = true;
       try {
-        const res = axios.post(`${env.API_URL}${API_ENDPOINTS.AUTH.REFRESH}`);
-        const newToken = res.data?.data?.acccessToken ?? res.data?.acccessToken;
+        const res = await axios.post(
+          `${env.API_URL}${API_ENDPOINTS.AUTH.REFRESH}`,
+        );
+        const newToken: string =
+          res.data?.data?.accessToken ?? res.data?.accessToken;
         useAuthStore.getState().setAuth({
           accessToken: newToken,
           role: useAuthStore.getState().role,
@@ -70,6 +72,7 @@ apiClient.interceptors.response.use(
         apiClient(originalReq);
       } catch (refrehsError) {
         processQueue(refrehsError, null);
+        useAuthStore.getState().clearAuth();
         toast.error("phien dang nhap het han");
         window.location.href = "/login";
         return Promise.reject(refrehsError);

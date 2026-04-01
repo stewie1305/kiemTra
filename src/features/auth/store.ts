@@ -1,16 +1,20 @@
-import type { AuthAction, AuthState } from "./types";
+import type { AuthActions, AuthState } from "./types";
 import { create } from "zustand";
-import { devtools, persist } from "zustand/middleware";
+import { createJSONStorage, devtools, persist } from "zustand/middleware";
 
-export const useAuthStore = create<AuthState & AuthAction>()(
-    devtools(
-        persist(
-            (set) => {
-                acccessToken: null;
-                role: null,
-                setAuth: ({accessToken,role}) => set({acccessToken: accessToken, role});
-                clearAuth:  set({accessToken: null, role: null});
-            }
-        )
-    )
-)
+export const useAuthStore = create<AuthState & AuthActions>()(
+  devtools(
+    persist(
+      (set) => ({
+        accessToken: null,
+        role: null,
+        setAuth: ({ accessToken, role }) => set({ accessToken, role }),
+        clearAuth: () => set({ accessToken: null, role: null }),
+      }),
+      {
+        name: "shopping-auth-storage",
+        storage: createJSONStorage(() => localStorage),
+      },
+    ),
+  ),
+);
