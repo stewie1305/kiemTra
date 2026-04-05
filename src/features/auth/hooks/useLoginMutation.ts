@@ -1,37 +1,30 @@
-import { useMutation } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useAuthStore } from "../store";
+import { useMutation } from "@tanstack/react-query";
+import type { LoginSchemaType } from "../schema";
+import { authService } from "../services";
 import { toast } from "sonner";
-import { useAuthStore } from "@/features/auth/store";
-import {
-  authService,
-  type AuthResponse,
-  type LoginRequest,
-} from "@/features/auth/services";
 
-export const useLoginMutation = () => {
-  const location = useLocation();
+export function useLoginMutation() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { setAuth } = useAuthStore();
-
   const from =
-    (location.state as { from?: { pathname: string } })?.from?.pathname ||
+    (location.state as { from: { pathname: string } })?.from?.pathname ||
     "/profile";
-
-  return useMutation<AuthResponse, Error, LoginRequest>({
-    mutationFn: (data) => authService.login(data),
+  return useMutation({
+    mutationFn: (data: LoginSchemaType) => authService.login(data),
     onSuccess: (response) => {
       setAuth({
         accessToken: response.accessToken,
         role: response.user.role === "admin" ? "admin" : "user",
       });
-
-      toast.success("Đăng nhập thành công");
-
+      toast.success("dang nhap thanh cong");
       if (response.user.role === "admin") {
-        navigate("/admin/ritual", { replace: true });
+        navigate("/admin/employees", { replace: true });
       } else {
         navigate(from, { replace: true });
       }
     },
   });
-};
+}

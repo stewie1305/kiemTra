@@ -1,4 +1,5 @@
 import apiClient from "@/lib/axios";
+import { API_ENDPOINTS } from "@/shared/constants";
 
 export type LoginRequest = {
   email: string;
@@ -46,5 +47,8 @@ export const authService = {
   login: async (_payload: LoginRequest): Promise<AuthResponse> => {
     void _payload;
     return authApi.fakeLogin();
+  },
+  async logout(): Promise<void> {
+    await apiClient.post(API_ENDPOINTS.AUTH.LOGOUT);
   },
 };
